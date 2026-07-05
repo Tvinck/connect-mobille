@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import { Package, MessageCircle } from 'lucide-react'
+import { Smartphone, MessageCircle, Wallet, Users } from 'lucide-react'
 import { Login } from './pages/Login'
 import { Orders } from './pages/Orders'
 import { Support } from './pages/Support'
+import { Finances } from './pages/Finances'
+import { CRM } from './pages/CRM'
 
 function BottomNav() {
   const navigate = useNavigate()
@@ -15,15 +17,29 @@ function BottomNav() {
         className={`nav-item ${location.pathname === '/' || location.pathname === '/orders' ? 'active' : ''}`}
         onClick={() => navigate('/orders')}
       >
-        <Package size={24} />
-        <span>Заказы</span>
+        <Smartphone size={22} />
+        <span style={{fontSize: '0.65rem'}}>Certs</span>
+      </div>
+      <div 
+        className={`nav-item ${location.pathname === '/finances' ? 'active' : ''}`}
+        onClick={() => navigate('/finances')}
+      >
+        <Wallet size={22} />
+        <span style={{fontSize: '0.65rem'}}>Финансы</span>
+      </div>
+      <div 
+        className={`nav-item ${location.pathname === '/crm' ? 'active' : ''}`}
+        onClick={() => navigate('/crm')}
+      >
+        <Users size={22} />
+        <span style={{fontSize: '0.65rem'}}>CRM</span>
       </div>
       <div 
         className={`nav-item ${location.pathname === '/support' ? 'active' : ''}`}
         onClick={() => navigate('/support')}
       >
-        <MessageCircle size={24} />
-        <span>Чат</span>
+        <MessageCircle size={22} />
+        <span style={{fontSize: '0.65rem'}}>Чат</span>
       </div>
     </nav>
   )
@@ -36,6 +52,8 @@ function ProtectedLayout() {
         <Route path="/" element={<Orders />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/support" element={<Support />} />
+        <Route path="/finances" element={<Finances />} />
+        <Route path="/crm" element={<CRM />} />
       </Routes>
       <BottomNav />
     </>
