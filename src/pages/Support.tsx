@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { MessageCircle, Send, ArrowLeft } from 'lucide-react'
 
@@ -7,6 +7,7 @@ export function Support() {
   const [activeChat, setActiveChat] = useState<string | null>(null)
   const [messages, setMessages] = useState<any[]>([])
   const [reply, setReply] = useState('')
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetchChats()
@@ -16,7 +17,7 @@ export function Support() {
     if (activeChat) {
       fetchMessages(activeChat)
       const sub = supabase.channel('support_msgs')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bazzar_chat', filter: `chat_id=eq.${activeChat}` }, payload => {
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `user_id=eq.${activeChat}` }, payload => {
           setMessages(prev => [...prev, payload.new])
         })
         .subscribe()
@@ -24,46 +25,65 @@ export function Support() {
     }
   }, [activeChat])
 
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
   const fetchChats = async () => {
     const { data } = await supabase
-      .from('bazzar_chat')
-      .select('chat_id, user_id, message, created_at, is_admin')
+      .from('support_messages')
+      .select('user_id, message, created_at, is_from_user, is_read, project')
       .order('created_at', { ascending: false })
+      .limit(500)
       
     if (data) {
-      // Group by chat_id
       const grouped = new Map()
       data.forEach(m => {
-        if (!grouped.has(m.chat_id)) {
-          grouped.set(m.chat_id, m)
+        if (!grouped.has(m.user_id)) {
+          grouped.set(m.user_id, m)
         }
       })
       setChats(Array.from(grouped.values()))
     }
   }
 
-  const fetchMessages = async (chatId: string) => {
+  const fetchMessages = async (userId: string) => {
     const { data } = await supabase
-      .from('bazzar_chat')
+      .from('support_messages')
       .select('*')
-      .eq('chat_id', chatId)
+      .eq('user_id', userId)
       .order('created_at', { ascending: true })
     if (data) setMessages(data)
+      
+    // Mark as read
+    await supabase
+      .from('support_messages')
+      .update({ is_read: true })
+      .eq('user_id', userId)
+      .eq('is_from_user', true)
+      .eq('is_read', false)
   }
 
   const sendReply = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!reply.trim() || !activeChat) return
     
-    const { error } = await supabase.from('bazzar_chat').insert([{
-      chat_id: activeChat,
-      user_id: 'admin',
-      message: reply,
-      is_admin: true,
-      created_at: new Date().toISOString()
+    // Get sender email from session
+    const { data: { session } } = await supabase.auth.getSession()
+    const senderEmail = session?.user?.email || 'admin@connect'
+
+    const { error } = await supabase.from('support_messages').insert([{
+      user_id: activeChat,
+      message: reply.trim(),
+      is_from_user: false,
+      is_read: true,
+      project: 'Connect Mobile',
+      sender_email: senderEmail
     }])
     
-    if (!error) setReply('')
+    if (!error) {
+      setReply('')
+    }
   }
 
   if (activeChat) {
@@ -76,11 +96,16 @@ export function Support() {
         
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column' }}>
           {messages.map(m => (
-            <div key={m.id} className={`chat-bubble ${m.is_admin ? 'mine' : 'other'}`}>
-              <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: 2 }}>{m.is_admin ? 'Вы' : 'Клиент'}</div>
-              {m.message}
+            <div key={m.id} className={`chat-bubble ${!m.is_from_user ? 'mine' : 'other'}`}>
+              <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: 2 }}>{!m.is_from_user ? 'Вы' : 'Клиент'}</div>
+              {m.message.startsWith('📷 [Изображение]:') ? (
+                <img src={m.message.split('📷 [Изображение]: ')[1]} alt="img" style={{ maxWidth: '100%', borderRadius: 8 }} />
+              ) : (
+                m.message
+              )}
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
         
         <form onSubmit={sendReply} style={{ padding: '12px 16px', background: 'var(--surface)', borderTop: '1px solid var(--hair-strong)', display: 'flex', gap: 8 }}>
@@ -99,19 +124,25 @@ export function Support() {
   }
 
   return (
-    <div style={{ padding: '16px' }}>
+    <div style={{ padding: '16px', paddingBottom: '80px' }}>
       <h2 style={{ marginBottom: 16 }}>Поддержка</h2>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {chats.length === 0 && <p style={{ color: 'var(--text-3)', textAlign: 'center', marginTop: 40 }}>Нет диалогов</p>}
         {chats.map(c => (
-          <div key={c.chat_id} className="card" style={{ padding: 16, cursor: 'pointer' }} onClick={() => setActiveChat(c.chat_id)}>
+          <div key={c.user_id} className="card" style={{ padding: 16, cursor: 'pointer' }} onClick={() => setActiveChat(c.user_id)}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}><MessageCircle size={16} /> {c.user_id ? 'Пользователь' : 'Гость'}</div>
+              <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <MessageCircle size={16} /> Пользователь
+                {!c.is_read && c.is_from_user && <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--red)' }} />}
+              </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>{new Date(c.created_at).toLocaleDateString()}</div>
             </div>
             <div style={{ color: 'var(--text-2)', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {c.is_admin ? 'Вы: ' : ''}{c.message}
+              {!c.is_from_user ? 'Вы: ' : ''}{c.message}
+            </div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', marginTop: 4, textTransform: 'uppercase' }}>
+              {c.project}
             </div>
           </div>
         ))}
