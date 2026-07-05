@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
+import { setupWebPush } from './lib/push'
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { Smartphone, MessageCircle, Wallet, Users } from 'lucide-react'
 import { Login } from './pages/Login'
@@ -79,6 +80,12 @@ function App() {
 
     return () => subscription.unsubscribe()
   }, [])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setupWebPush();
+    }
+  }, [isAuthenticated])
 
   if (loading) {
     return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)' }}>Загрузка...</div>
