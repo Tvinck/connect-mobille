@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { Smartphone, CheckCircle2, Clock, PlayCircle } from 'lucide-react'
+import { Smartphone, CheckCircle2, Clock, PlayCircle, Copy } from 'lucide-react'
 
 export function Orders() {
   const [orders, setOrders] = useState<any[]>([])
@@ -25,16 +25,30 @@ export function Orders() {
 
   const cycleStatus = async (id: string, currentStatus: string) => {
     let newStatus = 'in_progress'
-    if (currentStatus === 'pending') newStatus = 'in_progress'
-    else if (currentStatus === 'in_progress') newStatus = 'approved'
-    else if (currentStatus === 'approved') newStatus = 'pending'
+    let comment = null
+
+    if (currentStatus === 'pending') {
+      newStatus = 'in_progress'
+    } else if (currentStatus === 'in_progress') {
+      newStatus = 'approved'
+      const input = window.prompt('Введите инструкцию или комментарий для клиента (опционально):')
+      if (input === null) return // Отмена
+      comment = input
+    } else if (currentStatus === 'approved') {
+      newStatus = 'pending'
+    }
 
     // Optimistic update
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, crm_status: newStatus } : o))
+    setOrders(prev => prev.map(o => o.id === id ? { ...o, crm_status: newStatus, approval_comment: comment || o.approval_comment } : o))
     
+    const updatePayload: any = { crm_status: newStatus }
+    if (comment !== null) {
+      updatePayload.approval_comment = comment
+    }
+
     const { error } = await supabase
       .from('apple_certificates')
-      .update({ crm_status: newStatus })
+      .update(updatePayload)
       .eq('id', id)
       
     if (error) {
@@ -82,20 +96,26 @@ export function Orders() {
           {filteredOrders.map(o => (
             <div key={o.id} className="card" style={{ padding: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                <div style={{ maxWidth: '70%' }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 6, wordBreak: 'break-all' }}>
-                    <Smartphone size={16} style={{ flexShrink: 0 }} /> {o.udid.substring(0,20)}...
+                <div style={{ maxWidth: '75%' }}>
+                  <div 
+                    style={{ fontWeight: 600, fontSize: '0.8rem', display: 'flex', alignItems: 'flex-start', gap: 6, wordBreak: 'break-all', cursor: 'pointer' }}
+                    onClick={() => navigator.clipboard.writeText(o.udid).then(() => alert('UDID скопирован!'))}
+                  >
+                    <Smartphone size={16} style={{ flexShrink: 0, marginTop: 2 }} /> 
+                    {o.udid} 
+                    <Copy size={12} style={{ color: 'var(--text-3)', flexShrink: 0, marginTop: 4 }} />
                   </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginTop: 4 }}>
-                    {o.plan_id} • {o.source}
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-2)', marginTop: 8, display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <span style={{ padding: '2px 6px', background: 'var(--surface-2)', borderRadius: 4, fontWeight: 600 }}>{o.plan_id}</span>
+                    <span style={{ padding: '2px 6px', background: 'rgba(139, 92, 246, 0.15)', color: 'var(--violet)', borderRadius: 4, fontWeight: 600, textTransform: 'uppercase' }}>{o.source}</span>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: 2 }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: 4 }}>
                     {new Date(o.created_at).toLocaleString()}
                   </div>
                 </div>
                 <div style={{ fontWeight: 700, fontSize: '1rem', textAlign: 'right' }}>
                   {o.sale_price} ₽
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontWeight: 'normal' }}>Cost: ${o.api_cost}</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontWeight: 'normal' }}>API: ${o.api_cost}</div>
                 </div>
               </div>
               
@@ -109,7 +129,7 @@ export function Orders() {
                   }}
                 >
                   {o.crm_status === 'approved' ? <><CheckCircle2 size={16} /> Согласовано</> : 
-                   o.crm_status === 'in_progress' ? <><PlayCircle size={16} /> В работе</> : 
+                   o.crm_status === 'in_progress' ? <><PlayCircle size={16} /> Завершить (Выдать)</> : 
                    <><Clock size={16} /> На рассмотрении</>}
                 </button>
               </div>
