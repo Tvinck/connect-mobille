@@ -12,6 +12,28 @@ import { CRM } from './pages/CRM'
 function BottomNav() {
   const navigate = useNavigate()
   const location = useLocation()
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    const fetchUnread = async () => {
+      const { count } = await supabase
+        .from('support_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_from_user', true)
+        .eq('is_read', false)
+      setUnreadCount(count || 0)
+    }
+    
+    fetchUnread()
+    
+    const sub = supabase.channel('support_msgs_nav')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_messages' }, () => {
+        fetchUnread()
+      })
+      .subscribe()
+      
+    return () => { supabase.removeChannel(sub) }
+  }, [])
 
   return (
     <nav className="bottom-nav">
@@ -39,8 +61,14 @@ function BottomNav() {
       <div 
         className={`nav-item ${location.pathname === '/support' ? 'active' : ''}`}
         onClick={() => navigate('/support')}
+        style={{ position: 'relative' }}
       >
         <MessageCircle size={22} />
+        {unreadCount > 0 && (
+          <div style={{ position: 'absolute', top: 4, right: 12, background: 'var(--red)', color: '#fff', fontSize: '10px', fontWeight: 800, padding: '0 5px', borderRadius: 10, border: '2px solid var(--bg)' }}>
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </div>
+        )}
         <span style={{fontSize: '0.65rem'}}>Чат</span>
       </div>
     </nav>

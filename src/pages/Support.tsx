@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
-import { MessageCircle, Send, ArrowLeft } from 'lucide-react'
+import { MessageCircle, Send, ArrowLeft, Check, Clock } from 'lucide-react'
 
 export function Support() {
   const [chats, setChats] = useState<any[]>([])
@@ -40,7 +40,10 @@ export function Support() {
       const grouped = new Map()
       data.forEach(m => {
         if (!grouped.has(m.user_id)) {
-          grouped.set(m.user_id, m)
+          grouped.set(m.user_id, { ...m, unreadCount: 0 })
+        }
+        if (m.is_from_user && !m.is_read) {
+          grouped.get(m.user_id).unreadCount += 1
         }
       })
       setChats(Array.from(grouped.values()))
@@ -132,9 +135,22 @@ export function Support() {
         {chats.map(c => (
           <div key={c.user_id} className="card" style={{ padding: 16, cursor: 'pointer' }} onClick={() => setActiveChat(c.user_id)}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <MessageCircle size={16} /> Пользователь
-                {!c.is_read && c.is_from_user && <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--red)' }} />}
+              <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <MessageCircle size={16} /> 
+                <span>Пользователь</span>
+                {c.unreadCount > 0 ? (
+                  <div style={{ background: 'var(--red)', color: '#fff', fontSize: '0.65rem', fontWeight: 800, padding: '2px 6px', borderRadius: 12 }}>
+                    {c.unreadCount} новых
+                  </div>
+                ) : c.is_from_user ? (
+                  <div style={{ background: 'rgba(251, 191, 36, 0.15)', color: '#fbbf24', fontSize: '0.65rem', fontWeight: 700, padding: '2px 6px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <Clock size={10} /> Ждет
+                  </div>
+                ) : (
+                  <div style={{ background: 'rgba(52, 211, 153, 0.15)', color: '#34d399', fontSize: '0.65rem', fontWeight: 700, padding: '2px 6px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <Check size={10} /> Отвечен
+                  </div>
+                )}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>{new Date(c.created_at).toLocaleDateString()}</div>
             </div>
