@@ -67,7 +67,7 @@ export function Orders() {
           className="btn btn-primary" 
           onClick={() => {
             import('../lib/push').then(({ setupWebPush }) => {
-              setupWebPush().then(() => alert('Уведомления включены!'))
+              setupWebPush();
             })
           }} 
           style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', background: 'rgba(139, 92, 246, 0.2)', color: 'var(--violet)' }}

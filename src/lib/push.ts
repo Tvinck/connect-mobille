@@ -55,7 +55,10 @@ export async function setupWebPush() {
   if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
     try {
       const permission = await Notification.requestPermission();
-      if (permission !== 'granted') return;
+      if (permission !== 'granted') {
+        alert('Разрешение на уведомления не предоставлено: ' + permission);
+        return;
+      }
 
       const registration = await navigator.serviceWorker.register('/sw.js');
       await navigator.serviceWorker.ready;
@@ -63,7 +66,10 @@ export async function setupWebPush() {
       let subscription = await registration.pushManager.getSubscription();
       if (!subscription) {
         const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
-        if (!vapidPublicKey) return;
+        if (!vapidPublicKey) {
+          alert('Ошибка: VAPID ключ не найден в конфигурации');
+          return;
+        }
 
         const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
         subscription = await registration.pushManager.subscribe({
@@ -73,8 +79,13 @@ export async function setupWebPush() {
       }
 
       await addSubscription(subscription.toJSON() as PushSub);
-    } catch (err) {
+      alert('Подписка успешно сохранена в базу!');
+    } catch (err: any) {
+      alert('Ошибка Web Push: ' + err.message);
       console.error('Failed to setup Web Push:', err);
+      throw err;
     }
+  } else {
+    alert('Ваш браузер или ОС не поддерживает Web Push уведомления. На iOS нужно добавить сайт на экран "Домой".');
   }
 }
