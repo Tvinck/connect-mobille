@@ -204,10 +204,10 @@ export function ClientLine({ onBack }: ClientLineProps) {
       
       setChats(prev => prev.map(c => c.user_id === active.user_id ? { ...c, messages: [...c.messages, localMsg], waitMin: 0 } : c));
 
-      // Call GGSel send-message endpoint if project is GGSel to make sure it forwards
+      // Call proxy endpoint (same-origin) which forwards to the Connect CRM API
+      // This avoids CORS issues — proxy is at /api/proxy/send-message on this domain
       if (active.project.toLowerCase().includes('ggsel')) {
-        const connectUrl = import.meta.env.VITE_CONNECT_URL || 'https://connect-4va6.vercel.app';
-        const res = await fetch(`${connectUrl}/api/shop/ggsel/send-message`, {
+        const res = await fetch('/api/proxy/send-message', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
