@@ -1,168 +1,145 @@
 :root {
-  --bg: #09090b;
-  --surface: #18181b;
-  --surface-2: #27272a;
-  --hair: rgba(255, 255, 255, 0.05);
-  --hair-strong: rgba(255, 255, 255, 0.1);
-  --text: #fafafa;
-  --text-2: #a1a1aa;
-  --text-3: #71717a;
-  
-  --violet: #8b5cf6;
-  --green: #10b981;
-  --amber: #f59e0b;
-  --red: #ef4444;
+  /* Base surfaces */
+  --bg: #000000;                 /* app background (photos: pure black) */
+  --surface: #1c1c1e;            /* primary card */
+  --surface-2: #2c2c2e;          /* nested element on card (inner button, tile) */
+  --surface-3: #3a3a3c;          /* pressed / tertiary fill */
+  --hair: rgba(255, 255, 255, 0.06);
+  --hair-strong: rgba(255, 255, 255, 0.12);
 
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 16px;
-  
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  /* Text */
+  --text: #ffffff;
+  --text-2: #a1a1a6;             /* secondary — card subtitles */
+  --text-3: #6e6e73;             /* tertiary — timestamps, inactive nav */
+
+  /* Accent */
+  --accent: #0a84ff;             /* iOS blue — links, active nav, bell, text buttons */
+  --accent-dim: rgba(10, 132, 255, 0.15);
+
+  /* Brand CTA */
+  --yellow: #ffdd2d;             /* primary CTA fill */
+  --on-yellow: #1c1c1e;          /* text on yellow */
+
+  /* Semantic */
+  --green: #2fae5c;
+  --green-dim: rgba(47, 174, 92, 0.15);
+  --red: #ff453a;
+  --red-dim: rgba(255, 69, 58, 0.15);
+  --amber: #ffd60a;
+  --amber-dim: rgba(255, 214, 10, 0.15);
+  --violet: #bf5af2;
+  --violet-dim: rgba(191, 90, 242, 0.15);
+
+  /* Promo banner gradient */
+  --promo-grad: linear-gradient(105deg, #2e7d44 0%, #3f9e57 55%, #56b56b 100%);
+
+  /* Semantic aliases */
+  --surface-card: var(--surface);
+  --surface-inset: var(--surface-2);
+  --text-body: var(--text);
+  --text-muted: var(--text-2);
+  --link: var(--accent);
+  --nav-active: var(--accent);
+  --nav-inactive: var(--text-3);
+
+  --tabbar-bg: rgba(22, 22, 24, 0.92);
+
+  /* Typography Scale */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --fs-large-title: 34px;   /* screen title "Главная", "Еще" */
+  --fs-title: 22px;         /* card section header "Полезные сервисы" */
+  --fs-headline: 17px;      /* nav-bar title, row labels, buttons */
+  --fs-body: 17px;
+  --fs-subhead: 15px;       /* card subtitles, chat text */
+  --fs-footnote: 13px;      /* timestamps, meta rows */
+  --fs-caption: 11px;       /* tab-bar labels */
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  --lh-tight: 1.2;
+  --lh-body: 1.35;
+
+  /* Spacing and radii */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+
+  /* Radii */
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* Layout */
+  --screen-pad: 16px;
+  --card-pad: 20px;
+  --tabbar-h: 82px;
+
+  /* Elevation */
+  --shadow-none: none;
+  --shadow-sheet: 0 -8px 32px rgba(0, 0, 0, 0.6);
 }
 
+[data-theme="light"] {
+  --bg: #f2f2f7;
+  --surface: #ffffff;
+  --surface-2: #ececef;
+  --surface-3: #dedee3;
+  --hair: rgba(0, 0, 0, 0.06);
+  --hair-strong: rgba(0, 0, 0, 0.12);
+
+  --text: #000000;
+  --text-2: #6b6b70;
+  --text-3: #9a9aa0;
+
+  --accent: #007aff;
+  --accent-dim: rgba(0, 122, 255, 0.12);
+
+  --on-yellow: #1c1c1e;
+
+  --green: #2aa952;
+  --green-dim: rgba(42, 169, 82, 0.14);
+  --red: #ff3b30;
+  --red-dim: rgba(255, 59, 48, 0.12);
+  --amber: #e0a800;
+  --amber-dim: rgba(224, 168, 0, 0.16);
+  --violet: #af52de;
+  --violet-dim: rgba(175, 82, 222, 0.14);
+
+  --tabbar-bg: rgba(255, 255, 255, 0.9);
+}
+
+/* Base styles */
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {
-  background-color: var(--bg);
+  margin: 0;
+  background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
   -webkit-font-smoothing: antialiased;
-  padding-bottom: 80px; /* space for bottom nav */
 }
 
 a {
-  color: inherit;
+  color: var(--link);
   text-decoration: none;
+}
+
+a:hover {
+  color: #3f9dff;
 }
 
 button {
   font-family: inherit;
-}
-
-/* Utils */
-.container {
-  padding: 16px;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--hair);
-  border-radius: var(--radius);
-  padding: 16px;
-}
-
-.field {
-  width: 100%;
-  background: var(--surface-2);
-  border: 1px solid var(--hair-strong);
-  color: var(--text);
-  padding: 12px 16px;
-  border-radius: var(--radius-sm);
-  outline: none;
-  font-size: 1rem;
-}
-
-.field:focus {
-  border-color: var(--violet);
-}
-
-.btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  font-size: 1rem;
-}
-
-.btn-primary {
-  background: var(--violet);
-  color: #fff;
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--text);
-  border: 1px solid var(--hair-strong);
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-/* Bottom Nav */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 65px;
-  background: rgba(24, 24, 27, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid var(--hair-strong);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding-bottom: env(safe-area-inset-bottom);
-  z-index: 50;
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  color: var(--text-3);
-  font-size: 0.7rem;
-  font-weight: 600;
-  flex: 1;
-  height: 100%;
-  transition: color 0.2s;
-}
-
-.nav-item.active {
-  color: var(--violet);
-}
-
-/* Chat */
-.chat-bubble {
-  padding: 12px 16px;
-  border-radius: var(--radius-lg);
-  max-width: 85%;
-  line-height: 1.4;
-  font-size: 0.95rem;
-  margin-bottom: 8px;
-}
-
-.chat-bubble.mine {
-  background: var(--violet);
-  color: #fff;
-  align-self: flex-end;
-  border-bottom-right-radius: 4px;
-}
-
-.chat-bubble.other {
-  background: var(--surface-2);
-  color: var(--text);
-  align-self: flex-start;
-  border-bottom-left-radius: 4px;
 }
