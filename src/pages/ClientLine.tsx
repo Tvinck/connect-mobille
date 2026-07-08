@@ -5,6 +5,7 @@ import { Field } from '../components/core/Field';
 import { Icon } from '../components/core/Icon';
 import { Badge } from '../components/core/Badge';
 import { ChatBubble } from '../components/content/ChatBubble';
+import { SupportSidePanel } from '../components/support/SupportSidePanel';
 
 interface ClientChat {
   user_id: string;
@@ -41,6 +42,8 @@ interface ClientLineProps {
   onBack: () => void;
 }
 
+type ChatTab = 'chat' | 'order' | 'replies' | 'procedures';
+
 export function ClientLine({ onBack }: ClientLineProps) {
   const [chats, setChats] = useState<ClientChat[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -48,6 +51,7 @@ export function ClientLine({ onBack }: ClientLineProps) {
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(true);
   const [senderEmail, setSenderEmail] = useState('unknown');
+  const [chatTab, setChatTab] = useState<ChatTab>('chat');
   
   const endRef = useRef<HTMLDivElement>(null);
   const active = chats.find(c => c.user_id === activeId);
@@ -246,31 +250,85 @@ export function ClientLine({ onBack }: ClientLineProps) {
 
   if (active) {
     const src = SOURCE[active.source] || SOURCE.other;
+    const isGgsel = active.project.toLowerCase().includes('ggsel');
+
+    const CHAT_TABS: { id: ChatTab; label: string }[] = [
+      { id: 'chat',       label: '💬 Чат' },
+      { id: 'order',      label: '📦 Заказ' },
+      { id: 'replies',    label: '⚡ Шаблоны' },
+      { id: 'procedures', label: '✅ Чеклист' },
+    ];
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--bg)', color: 'var(--text)' }}>
-        <NavBar title={active.name} subtitle={`${active.platform} · ${src.label}`} onBack={() => setActiveId(null)} />
-        <div style={{ flex: 1, overflowY: 'auto', padding: '8px 16px', display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 100 }}>
-          {active.messages.map((m) => (
-            <ChatBubble
-              key={m.id}
-              mine={!m.is_from_user}
-              author={m.is_from_user ? 'Клиент' : (m.sender_email?.split('@')[0] || 'Оператор')}
-              time={new Date(m.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-              read={m.is_read}
+        <NavBar title={active.name} subtitle={`${active.platform} · ${src.label}`} onBack={() => { setActiveId(null); setChatTab('chat'); }} />
+
+        {/* Tab bar */}
+        <div style={{
+          display: 'flex', background: 'var(--surface)', borderBottom: '0.5px solid var(--hair)',
+          overflowX: 'auto', scrollbarWidth: 'none', flexShrink: 0,
+        }}>
+          {CHAT_TABS.map(t => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setChatTab(t.id)}
+              style={{
+                flex: 1, minWidth: 'fit-content', padding: '10px 12px',
+                border: 'none', background: 'none', cursor: 'pointer',
+                fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600,
+                color: chatTab === t.id ? 'var(--accent)' : 'var(--text-3)',
+                borderBottom: chatTab === t.id ? '2px solid var(--accent)' : '2px solid transparent',
+                transition: 'color 0.15s, border-color 0.15s', whiteSpace: 'nowrap',
+              }}
             >
-              {m.message}
-            </ChatBubble>
+              {t.label}
+            </button>
           ))}
-          <div ref={endRef}></div>
         </div>
-        
-        <form onSubmit={send} style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'var(--tabbar-bg)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', display: 'flex', gap: 8, alignItems: 'center', padding: '10px 16px 24px 16px', borderTop: '0.5px solid var(--hair-strong)', zIndex: 100 }}>
-          <Icon name="paperclip" size={24} color="var(--accent)" onClick={() => alert('Прикрепление файлов скоро будет доступно')} style={{ cursor: 'pointer' }} />
-          <Field placeholder="Ответ клиенту" value={draft} onChange={(e) => setDraft(e.target.value)} style={{ borderRadius: 'var(--radius-pill)', padding: '10px 16px' }} />
-          <button type="submit" style={{ width: 40, height: 40, borderRadius: '50%', border: 'none', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
-            <Icon name="arrow-up" size={20} color="#fff" strokeWidth={2.5} />
-          </button>
-        </form>
+
+        {/* Chat tab */}
+        {chatTab === 'chat' && (
+          <>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '8px 16px', display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 100 }}>
+              {active.messages.map((m) => (
+                <ChatBubble
+                  key={m.id}
+                  mine={!m.is_from_user}
+                  author={m.is_from_user ? 'Клиент' : (m.sender_email?.split('@')[0] || 'Оператор')}
+                  time={new Date(m.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                  read={m.is_read}
+                >
+                  {m.message}
+                </ChatBubble>
+              ))}
+              <div ref={endRef}></div>
+            </div>
+            <form onSubmit={send} style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'var(--tabbar-bg)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', display: 'flex', gap: 8, alignItems: 'center', padding: '10px 16px 24px 16px', borderTop: '0.5px solid var(--hair-strong)', zIndex: 100 }}>
+              <Icon name="paperclip" size={24} color="var(--accent)" onClick={() => alert('Прикрепление файлов скоро будет доступно')} style={{ cursor: 'pointer' }} />
+              <Field placeholder="Ответ клиенту" value={draft} onChange={(e) => setDraft(e.target.value)} style={{ borderRadius: 'var(--radius-pill)', padding: '10px 16px' }} />
+              <button type="submit" style={{ width: 40, height: 40, borderRadius: '50%', border: 'none', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                <Icon name="arrow-up" size={20} color="#fff" strokeWidth={2.5} />
+              </button>
+            </form>
+          </>
+        )}
+
+        {/* Side panel tabs: Заказ / Шаблоны / Процедуры */}
+        {chatTab !== 'chat' && (
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+            <SupportSidePanel
+              userId={active.user_id}
+              project={active.project}
+              isGgsel={isGgsel}
+              activeTab={chatTab as 'order' | 'replies' | 'procedures'}
+              onInsertReply={(text) => {
+                setDraft(text);
+                setChatTab('chat');
+              }}
+            />
+          </div>
+        )}
       </div>
     );
   }
