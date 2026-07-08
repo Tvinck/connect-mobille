@@ -206,7 +206,8 @@ export function ClientLine({ onBack }: ClientLineProps) {
 
       // Call GGSel send-message endpoint if project is GGSel to make sure it forwards
       if (active.project.toLowerCase().includes('ggsel')) {
-        const res = await fetch('https://connect.tvinck.ru/api/shop/ggsel/send-message', {
+        const connectUrl = import.meta.env.VITE_CONNECT_URL || 'https://connect-three-green.vercel.app';
+        const res = await fetch(`${connectUrl}/api/shop/ggsel/send-message`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
