@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import type { Procedure, ProcedureStep } from '../../types/support';
+import { useState, useEffect } from 'react';
+import type { Procedure } from '../../types/support';
 
 interface Props {
   platform: string;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { OrderDetailsCard } from './OrderDetailsCard';
 import { QuickReplies } from './QuickReplies';
 import { Procedures } from './Procedures';
