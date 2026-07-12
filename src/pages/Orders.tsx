@@ -152,7 +152,7 @@ export function Orders({ onBack }: OrdersProps) {
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 'var(--fs-footnote)', fontWeight: 'var(--fw-semibold)', wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: 6 }}>
                       <Icon name="smartphone" size={15} color="var(--text-2)" style={{ flexShrink: 0 }} />
-                      <span style={{ fontFamily: 'monospace' }}>{o.udid.substring(0, 15)}...</span>
+                      <span style={{ fontFamily: 'monospace' }}>{o.udid}</span>
                     </div>
                     <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                       <Badge tone="neutral">{o.plan_id}</Badge>
