@@ -17,7 +17,7 @@ export default async function handler(req, res) {
   try {
     const response = await fetch(
       `${CONNECT_URL}/api/shop/ggsel/order-details?userId=${encodeURIComponent(userId)}`,
-      { headers: { 'Content-Type': 'application/json' } }
+      { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.SHOP_API_KEY}` } }
     );
     const data = await response.json();
     return res.status(response.status).json(data);

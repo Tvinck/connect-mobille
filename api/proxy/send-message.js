@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   try {
     const response = await fetch(`${CONNECT_URL}/api/shop/ggsel/send-message`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.SHOP_API_KEY}` },
       body: JSON.stringify(req.body),
     });
 
