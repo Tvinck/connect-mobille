@@ -59,16 +59,32 @@ export function ManualRegistration({ onBack }: ManualRegistrationProps) {
 
   // Профиль оператора
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return;
-      setUserId(user.id);
-      const { data: profile } = await supabase
-        .from('users')
-        .select('full_name, email')
-        .eq('id', user.id)
-        .maybeSingle();
-      setUserName(profile?.full_name || user.email?.split('@')[0] || 'Оператор');
-    });
+    const loadProfile = async () => {
+      try {
+        // getSession() is more reliable than getUser() — doesn't make a network call
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user;
+        if (!user) {
+          console.error('No active session for ManualRegistration');
+          return;
+        }
+        setUserId(user.id);
+        const { data: profile } = await supabase
+          .from('users')
+          .select('full_name, email')
+          .eq('id', user.id)
+          .maybeSingle();
+        setUserName(
+          profile?.full_name ||
+          user.user_metadata?.full_name ||
+          user.email?.split('@')[0] ||
+          'Оператор'
+        );
+      } catch (err) {
+        console.error('Error loading operator profile:', err);
+      }
+    };
+    loadProfile();
   }, []);
 
   // Список заявок + realtime
