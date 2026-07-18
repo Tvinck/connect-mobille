@@ -210,7 +210,7 @@ export function Home({
 
         <Card>
           <div style={{ fontSize: 'var(--fs-title)', fontWeight: 'var(--fw-bold)', marginBottom: 6 }}>Выход на линию</div>
-          <div style={{ fontSize: 'var(--fs-subhead)', color: 'var(--text-2)', marginBottom: 16 }}>Получайте задания и совершайте звонки клиентам</div>
+          <div style={{ fontSize: 'var(--fs-subhead)', color: 'var(--text-2)', marginBottom: 16 }}>Получайте задания и ведите диалог с клиентами</div>
           <Button variant="tonal" block onClick={onStartLine}>Начать работу</Button>
         </Card>
 
