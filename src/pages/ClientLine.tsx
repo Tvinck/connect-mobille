@@ -6,6 +6,7 @@ import { Icon } from '../components/core/Icon';
 import { Badge } from '../components/core/Badge';
 import { ChatBubble } from '../components/content/ChatBubble';
 import { SupportSidePanel } from '../components/support/SupportSidePanel';
+import { toast } from '../lib/toast';
 
 interface ClientChat {
   user_id: string;
@@ -197,7 +198,7 @@ export function ClientLine({ onBack }: ClientLineProps) {
     try {
       // Optimistic update local state
       const localMsg = {
-        id: Date.now(),
+        id: `local-${crypto.randomUUID()}`,
         user_id: active.user_id,
         message: textToSend,
         is_from_user: false,
@@ -243,7 +244,7 @@ export function ClientLine({ onBack }: ClientLineProps) {
       fetchChatsData();
     } catch (err: any) {
       console.error('Failed to send message:', err);
-      alert('Ошибка при отправке: ' + err.message);
+      toast('Ошибка при отправке: ' + err.message, 'error');
       fetchChatsData(); // Revert/Reload
     }
   };
@@ -305,7 +306,7 @@ export function ClientLine({ onBack }: ClientLineProps) {
               <div ref={endRef}></div>
             </div>
             <form onSubmit={send} style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'var(--tabbar-bg)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', display: 'flex', gap: 8, alignItems: 'center', padding: '10px 16px 24px 16px', borderTop: '0.5px solid var(--hair-strong)', zIndex: 100 }}>
-              <Icon name="paperclip" size={24} color="var(--accent)" onClick={() => alert('Прикрепление файлов скоро будет доступно')} style={{ cursor: 'pointer' }} />
+              <Icon name="paperclip" size={24} color="var(--accent)" onClick={() => toast('Прикрепление файлов скоро будет доступно', 'info')} style={{ cursor: 'pointer' }} />
               <Field placeholder="Ответ клиенту" value={draft} onChange={(e) => setDraft(e.target.value)} style={{ borderRadius: 'var(--radius-pill)', padding: '10px 16px' }} />
               <button type="submit" style={{ width: 40, height: 40, borderRadius: '50%', border: 'none', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
                 <Icon name="arrow-up" size={20} color="#fff" strokeWidth={2.5} />

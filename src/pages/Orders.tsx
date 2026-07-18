@@ -5,6 +5,7 @@ import { Card } from '../components/layout/Card';
 import { Button } from '../components/core/Button';
 import { Badge } from '../components/core/Badge';
 import { Icon } from '../components/core/Icon';
+import { toast } from '../lib/toast';
 
 interface Order {
   id: string;
@@ -97,7 +98,7 @@ export function Orders({ onBack }: OrdersProps) {
       if (error) throw error;
     } catch (err) {
       console.error('Error cycling status:', err);
-      alert('Ошибка при обновлении статуса');
+      toast('Ошибка при обновлении статуса', 'error');
       fetchOrders(); // Revert
     }
   };

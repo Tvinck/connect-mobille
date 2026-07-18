@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { Field } from '../components/core/Field';
 import { Button } from '../components/core/Button';
 import { Icon } from '../components/core/Icon';
+import { toast } from '../lib/toast';
 
 interface LoginProps {
   onLogin: () => void;
@@ -98,7 +99,7 @@ export function Login({ onLogin }: LoginProps) {
         <Button variant="primary" block disabled={loading} style={{ marginTop: 8 }}>
           {loading ? 'Вход...' : 'Войти'}
         </Button>
-        <button type="button" onClick={() => alert('Пожалуйста, обратитесь к руководителю для сброса пароля.')} style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: 'var(--fs-subhead)', fontWeight: 'var(--fw-medium)', cursor: 'pointer', padding: 10, fontFamily: 'var(--font-sans)' }}>
+        <button type="button" onClick={() => toast('Пожалуйста, обратитесь к руководителю для сброса пароля.', 'info')} style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: 'var(--fs-subhead)', fontWeight: 'var(--fw-medium)', cursor: 'pointer', padding: 10, fontFamily: 'var(--font-sans)' }}>
           Не помню пароль
         </button>
       </form>

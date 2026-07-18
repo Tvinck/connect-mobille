@@ -10,6 +10,7 @@ interface ServicesHRProps {
 }
 
 const services = [
+  { icon: 'file-check', title: 'Ручная регистрация', key: 'services/manual-registration' },
   { icon: 'newspaper', title: 'Новости', key: 'news' },
   { icon: 'calendar-clock', title: 'TWFM', key: 'coming:TWFM' },
   { icon: 'chart-line', title: 'Статистика', key: 'coming:Статистика' },

@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { toast } from './toast';
 
 const PUSH_KEY = 'web_push_subscriptions';
 
@@ -56,7 +57,8 @@ export async function setupWebPush() {
     try {
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
-        alert('Разрешение на уведомления не предоставлено: ' + permission);
+        // Тихо: не навязываемся, если пользователь отклонил/отложил
+        console.info('Push permission not granted:', permission);
         return;
       }
 
@@ -67,7 +69,7 @@ export async function setupWebPush() {
       if (!subscription) {
         const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
         if (!vapidPublicKey) {
-          alert('Ошибка: VAPID ключ не найден в конфигурации');
+          console.error('VAPID public key missing in configuration');
           return;
         }
 
@@ -79,13 +81,14 @@ export async function setupWebPush() {
       }
 
       await addSubscription(subscription.toJSON() as PushSub);
-      alert('Подписка успешно сохранена в базу!');
+      // Успех — тихо, без назойливого уведомления при каждом входе
     } catch (err: any) {
-      alert('Ошибка Web Push: ' + err.message);
       console.error('Failed to setup Web Push:', err);
+      toast('Не удалось включить push-уведомления', 'error');
       throw err;
     }
   } else {
-    alert('Ваш браузер или ОС не поддерживает Web Push уведомления. На iOS нужно добавить сайт на экран "Домой".');
+    // Не поддерживается (частый случай на десктопе/iOS-браузере) — тихо
+    console.info('Web Push not supported in this browser/OS');
   }
 }

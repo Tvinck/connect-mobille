@@ -9,8 +9,8 @@ self.addEventListener('push', function(event) {
 
     const options = {
       body: data.body,
-      icon: '/vite.svg',
-      badge: '/vite.svg',
+      icon: '/favicon.svg',
+      badge: '/favicon.svg',
       vibrate: [200, 100, 200],
       data: {
         url: data.url || '/'

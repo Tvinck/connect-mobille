@@ -9,6 +9,7 @@ import { ListRow } from '../components/content/ListRow';
 import { ProjectPicker } from '../components/content/ProjectPicker';
 import { PromoBanner } from '../components/content/PromoBanner';
 import { Switch } from '../components/core/Switch';
+import { toast } from '../lib/toast';
 
 interface HomeProps {
   onOpenNotifications: () => void;
@@ -173,7 +174,7 @@ export function Home({
 
     if (error) {
       console.error('Error updating status:', error);
-      alert('Не удалось изменить рабочий статус');
+      toast('Не удалось изменить рабочий статус', 'error');
       // Revert status
       setUserStatus(isOn ? 'offline' : 'online');
     }

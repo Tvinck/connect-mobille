@@ -4,6 +4,7 @@ import { NavBar } from '../components/layout/NavBar';
 import { Field } from '../components/core/Field';
 import { Icon } from '../components/core/Icon';
 import { ChatBubble } from '../components/content/ChatBubble';
+import { toast } from '../lib/toast';
 
 interface Channel {
   id: string;
@@ -214,7 +215,7 @@ export function EmployeeChat() {
 
     if (error) {
       console.error('Failed to send message:', error);
-      alert('Не удалось отправить сообщение');
+      toast('Не удалось отправить сообщение', 'error');
     }
   };
 
@@ -244,7 +245,7 @@ export function EmployeeChat() {
         </div>
 
         <form onSubmit={send} style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'var(--tabbar-bg)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', display: 'flex', gap: 8, alignItems: 'center', padding: '10px 16px 24px 16px', borderTop: '0.5px solid var(--hair-strong)', zIndex: 100 }}>
-          <Icon name="paperclip" size={24} color="var(--accent)" onClick={() => alert('Прикрепление файлов скоро будет доступно')} style={{ cursor: 'pointer' }} />
+          <Icon name="paperclip" size={24} color="var(--accent)" onClick={() => toast('Прикрепление файлов скоро будет доступно', 'info')} style={{ cursor: 'pointer' }} />
           <Field placeholder="Сообщение" value={draft} onChange={(e) => setDraft(e.target.value)} style={{ borderRadius: 'var(--radius-pill)', padding: '10px 16px' }} />
           <button type="submit" style={{ width: 40, height: 40, borderRadius: '50%', border: 'none', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
             <Icon name="arrow-up" size={20} color="#fff" strokeWidth={2.5} />
